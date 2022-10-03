@@ -49,17 +49,11 @@ $middleware($app);
 $app->add(new JwtAuthentication([
     "secret" => $_ENV["JWT_SECRET"],
     "path" => [
-        "/branches",
-        "/categories",
-        "/customers",
-        "/combos",
-        "/dishes",
+        "/members",
         "/exercises",
-        "/foods",
         "/histories",
-        "/products",
+        "/memberships",
         "/profile",
-        "/sell",
         "/users"
     ],
     "error" => function ($response, $arguments) {
@@ -76,22 +70,13 @@ $app->add(new JwtAuthentication([
 $routes = require __DIR__ . '/../app/routes/auth.php';
 $routes($app);
 
-$routes = require __DIR__ . '/../app/routes/branch.php';
-$routes($app);
-
-$routes = require __DIR__ . '/../app/routes/customer.php';
-$routes($app);
-
-$routes = require __DIR__ . '/../app/routes/combo.php';
-$routes($app);
-
-$routes = require __DIR__ . '/../app/routes/dish.php';
+$routes = require __DIR__ . '/../app/routes/member.php';
 $routes($app);
 
 $routes = require __DIR__ . '/../app/routes/exercise.php';
 $routes($app);
 
-$routes = require __DIR__ . '/../app/routes/food.php';
+$routes = require __DIR__ . '/../app/routes/membership.php';
 $routes($app);
 
 $routes = require __DIR__ . '/../app/routes/history.php';

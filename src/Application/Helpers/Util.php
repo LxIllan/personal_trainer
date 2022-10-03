@@ -8,11 +8,18 @@ use App\Application\Helpers\EmailTemplate;
 
 class Util
 {
-    public const DISHES_ID = 1;
-    public const COMBOS_ID = 2;
-    public const DRINKS_ID = 3;
-    public const DESSERTS_D = 4;
-    public const EXTRAS_ID = 5;
+
+    /**
+     * @param int $id
+     * @param array $data
+     * @param string $table
+     * @return string
+     */
+    public static function addTimeToDate(string $date, int $months, int $weeks): string
+    {
+        $date = date('Y-m-d', strtotime("+{$weeks} week", strtotime($date)));
+        return date('Y-m-d', strtotime("+{$months} month", strtotime($date)));
+    }    
 
     /**
      * @param array $data
@@ -24,7 +31,7 @@ class Util
         $query = "INSERT INTO {$table}(";
 
         foreach ($data as $key => $value) {
-            $query .= "{$key}, ";
+            $query .= "`{$key}`, ";
         }
 
         $query = rtrim($query, ", ");
@@ -55,9 +62,9 @@ class Util
 
         foreach ($data as $key => $value) {
             if (is_string($value)) {
-                $query .= " $key = '$value',";
+                $query .= " `$key` = '$value',";
             } else {
-                $query .= " $key = $value,";
+                $query .= " `$key` = $value,";
             }
         }
 
@@ -84,7 +91,6 @@ class Util
      */
     public static function sendMail(array $data, string $template): bool
     {
-        $branchName = $data["branch_name"];
         $urlWebsite = $_ENV["URL_WEBSITE"];
         $emailWebsite = $_ENV["EMAIL_WEBSITE"];
         $to = $data["email"];
@@ -100,7 +106,6 @@ class Util
             return false;
         }
 
-        $message = str_replace("{branchName}", $branchName, $message);
         $message = str_replace("{urlWebsite}", $urlWebsite, $message);
 
         switch ($template) {
@@ -110,7 +115,6 @@ class Util
                 $message = str_replace("{foodName}", $data['food_name'], $message);
                 break;
             case EmailTemplate::PASSWORD_TO_NEW_USER:
-                $message = str_replace("{branchLocation}", $data['branch_location'], $message);
                 $message = str_replace("{userName}", $data['username'], $message);
                 $message = str_replace("{password}", $data['password'], $message);
                 break;
@@ -118,41 +122,18 @@ class Util
                 $message = str_replace("{userName}", $data['username'], $message);
                 $message = str_replace("{password}", $data['password'], $message);
                 break;
+            case EmailTemplate::RECEIPT:
+                $message = str_replace("{userName}", $data['username'], $message);
+                $message = str_replace("{date}", $data['date'], $message);
+                $message = str_replace("{membership}", $data['membership'], $message);
+                $message = str_replace("{price}", $data['price'], $message);
+                $message = str_replace("{endMembershipDate}", $data['endMembershipDate'], $message);
+                break;
             default:
                 return false;
         }
 
         return mail($to, $data['subject'], $message, $headers);
-    }
-
-    /**
-     * @param array $data
-     * @return bool
-     */
-    public static function sendNotificationToAdmin(array $data): bool
-    {
-        $to = $data["email"];
-        $subject = "Notification from: {$data["branchName"]}";
-        $headers = "From: {$_ENV["EMAIL_WEBSITE"]}\r\n" .
-            "Reply-To: {$_ENV["EMAIL_WEBSITE"]}" . "\r\n" .
-            'X-Mailer: PHP/' . phpversion() . "\r\n" .
-            'MIME-Version: 1.0' . "\r\n" .
-            'Content-type: text/html; charset=utf-8' . "\r\n";
-        $message =  "<html>" .
-            "<head>" .
-            "<title>{$data["branchName"]}</title>" .
-            "</head>" .
-            "<body>" .
-            "<h3>{$data["branchLocation"]}</h3>" .
-            "Quedan <b>{$data["quantity"]}</b> unidades de <b>{$data["foodName"]}</b>" .
-            "<br>" .
-            "<br>" .
-            "<a href='{$_ENV["URL_WEBSITE"]}'>pollorey.syss.tech</a>" .
-            "<br>" .
-            "</body>" .
-            "</html>";
-
-        return mail($to, $subject, $message, $headers);
     }
 
     /**

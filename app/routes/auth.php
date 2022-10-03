@@ -20,7 +20,6 @@ return function (App $app) {
                 'iat' => time(),
                 'exp' => time() + 99999999,
                 'user_id' => intval($user['id']),
-                'branch_id' => intval($user['branch_id']),
                 'root' => boolval($user['root'])
             ];
             $secret = $_ENV["JWT_SECRET"];
