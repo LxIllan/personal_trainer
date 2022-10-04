@@ -49,7 +49,7 @@ class MemberController
                 'username' => "$member->name $member->last_name"
             ];
             if (!Util::sendMail($dataToSendEmail, EmailTemplate::PASSWORD_TO_NEW_USER)) {
-                throw new Exception('Error to send password to new user.');
+                throw new Exception('Error to send password to new member.');
             }
             $receiptController = new ReceiptController();
             $receipt = $receiptController->create([
@@ -57,22 +57,69 @@ class MemberController
                 'member_id' => $member->id,
                 'membership_id' => $data['membership_id'],
                 'price' => $membership->price
-            ]);            
+            ]);       
             if ($receipt) {
                 $dataToSendEmail = [
                     'username' => "$member->name $member->last_name",
                     'date' => $today,
                     'membership' => $membership->membership,
                     'price' => $membership->price,
-                    'endMembershipDate' => $endMembership
+                    'endMembershipDate' => $endMembership,
+                    'email' => $member->email,
+                    'subject' => "Recibo de la membresía"
                 ];
                 if (!Util::sendMail($dataToSendEmail, EmailTemplate::RECEIPT)) {
-                    throw new Exception('Error to send receipt to user.');
+                    throw new Exception('Error to send receipt to member.');
                 }       
             }
         }
         return $member;
     }
+
+    /**
+     * @param int $memberId
+     * @param int $membershipId
+     * @param int $userId
+     * @return Member|null
+     * @throws Exception
+     */
+    public function payMembership(int $memberId, int $membershipId, int $userId): Member|null
+    {
+        $membershipController = new MembershipController();
+        $membership = $membershipController->getById($membershipId);
+        $member = $this->getMemberById($memberId);
+        $today = date('Y-m-d');
+        if ($member->end_membership_date > $today) {
+            $endMembership = Util::addTimeToDate($member->end_membership_date, intval($membership->months), intval($membership->weeks));
+        } else {
+            $endMembership = Util::addTimeToDate($today, intval($membership->months), intval($membership->weeks));
+        }
+                
+        $receiptController = new ReceiptController();
+        $receipt = $receiptController->create([
+            'user_id' => $userId,
+            'member_id' => $memberId,
+            'membership_id' => $membershipId,
+            'price' => $membership->price
+        ]);       
+        if ($receipt) {
+            $member = $this->memberDAO->edit($memberId, ['end_membership_date' => $endMembership]);
+            $today = date('Y-m-d H:i:s');
+            $dataToSendEmail = [
+                'username' => "$member->name $member->last_name",
+                'date' => $today,
+                'membership' => $membership->membership,
+                'price' => $membership->price,
+                'endMembershipDate' => $endMembership,
+                'email' => $member->email,
+                'subject' => "Recibo de la membresía"
+            ];
+            if (!Util::sendMail($dataToSendEmail, EmailTemplate::RECEIPT)) {
+                throw new Exception('Error to send receipt to member.');
+            }       
+        }        
+        return $member;
+    }    
 
     /**
      * @param int $id

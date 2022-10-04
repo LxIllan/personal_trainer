@@ -119,7 +119,7 @@ return function (App $app) {
     });
 
     /**
-     * @api /receipts
+     * @api /members/{id}/receipts
      * @method GET
      * @description Get receipts by member
      */
@@ -128,6 +128,21 @@ return function (App $app) {
         $jwt = $request->getAttribute("token");
         $receipts = $receiptController->getByMember(intval($args['id']));
         $response->getBody()->write(Util::encodeData($receipts, "receipts"));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+
+    /**
+     * @api /members/{id}/pay-membership
+     * @method PUT
+     * @description Pay membership
+     */
+    $app->put('/members/{id}/pay-membership', function (Request $request, Response $response, $args) {        
+        $memberController = new MemberController();
+        $jwt = $request->getAttribute("token");
+        $body = $request->getParsedBody();
+        $body["user_id"] = $jwt["user_id"];
+        $member = $memberController->payMembership(intval($args['id']), intval($body['membership_id']), intval($body['user_id']));
+        $response->getBody()->write(Util::encodeData($member, "member"));
         return $response->withHeader('Content-Type', 'application/json');
     });
 };

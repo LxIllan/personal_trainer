@@ -73,7 +73,7 @@ class MemberDAO
     {
         $now = date('Y-m-d H:i:s');
         $data = [
-            "enabled" => 0,
+            "deleted" => 1,
             "deleted_at" => $now
         ];
         $query = Util::prepareUpdateQuery($id, $data, self::TABLE_NAME);
