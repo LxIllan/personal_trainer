@@ -48,12 +48,13 @@ $middleware($app);
 // JWT Authentication
 $app->add(new JwtAuthentication([
     "secret" => $_ENV["JWT_SECRET"],
-    "path" => [
-        "/members",
+    "path" => [        
         "/exercises",
-        "/histories",
+        // "/files",
+        "/members",
         "/memberships",
         "/profile",
+        "/receipts",
         "/users"
     ],
     "error" => function ($response, $arguments) {
@@ -70,19 +71,19 @@ $app->add(new JwtAuthentication([
 $routes = require __DIR__ . '/../app/routes/auth.php';
 $routes($app);
 
-$routes = require __DIR__ . '/../app/routes/member.php';
+$routes = require __DIR__ . '/../app/routes/exercise.php';
 $routes($app);
 
-$routes = require __DIR__ . '/../app/routes/exercise.php';
+$routes = require __DIR__ . '/../app/routes/file.php';
+$routes($app);
+
+$routes = require __DIR__ . '/../app/routes/member.php';
 $routes($app);
 
 $routes = require __DIR__ . '/../app/routes/membership.php';
 $routes($app);
 
-$routes = require __DIR__ . '/../app/routes/history.php';
-$routes($app);
-
-$routes = require __DIR__ . '/../app/routes/product.php';
+$routes = require __DIR__ . '/../app/routes/receipt.php';
 $routes($app);
 
 $routes = require __DIR__ . '/../app/routes/user.php';

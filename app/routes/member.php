@@ -21,9 +21,13 @@ return function (App $app) {
         $jwt = $request->getAttribute("token");
         $body = $request->getParsedBody();
         $body["user_id"] = $jwt["user_id"];
-        $member = $memberController->create($body);
-        $response->getBody()->write(Util::encodeData($member, "member", 201));
-        return $response->withHeader('Content-Type', 'application/json');
+        $member = $memberController->create($body);        
+        if ($member) {
+            $response->getBody()->write(Util::encodeData($member, "member", 201));
+            return $response->withHeader('Content-Type', 'application/json');
+        } else {
+            throw new HttpNotFoundException($request);
+        }
     });
 
     /**

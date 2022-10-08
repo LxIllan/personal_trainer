@@ -14,17 +14,20 @@ return function (App $app) {
     /**
      * @api /exercises
      * @method POST
-     * @description Create a new expense
+     * @description Create a new exercise
      */
     $app->post('/exercises', function (Request $request, Response $response) {
         $exerciseController = new ExerciseController();
         $jwt = $request->getAttribute("token");
         $body = $request->getParsedBody();
-        $body['branch_id'] = $jwt['branch_id'];
         $body['user_id'] = $jwt['user_id'];
-        $expense = $exerciseController->create($body);
-        $response->getBody()->write(Util::encodeData($expense, "expense", 201));
-        return $response->withHeader('Content-Type', 'application/json');
+        $exercise = $exerciseController->create($body);        
+        if ($exercise) {
+            $response->getBody()->write(Util::encodeData($exercise, "exercise", 201));
+            return $response->withHeader('Content-Type', 'application/json');
+        } else {
+            throw new HttpNotFoundException($request);
+        }
     });
 
     /**
@@ -42,13 +45,13 @@ return function (App $app) {
     /**
      * @api /exercises/{id}
      * @method GET
-     * @description Get expense by id
+     * @description Get exercise by id
      */
     $app->get('/exercises/{id}', function (Request $request, Response $response, $args) {
         $exerciseController = new ExerciseController();
-        $expense = $exerciseController->getById(intval($args['id']));
-        if ($expense) {
-            $response->getBody()->write(Util::encodeData($expense, "expense"));
+        $exercise = $exerciseController->getById(intval($args['id']));
+        if ($exercise) {
+            $response->getBody()->write(Util::encodeData($exercise, "exercise"));
             return $response->withHeader('Content-Type', 'application/json');
         } else {
             throw new HttpNotFoundException($request);
@@ -58,14 +61,14 @@ return function (App $app) {
     /**
      * @api /exercises/{id}
      * @method PUT
-     * @description Edit expense by id
+     * @description Edit exercise by id
      */
     $app->put('/exercises/{id}', function (Request $request, Response $response, $args) {
         $exerciseController = new ExerciseController();
         $body = $request->getParsedBody();
-        $expense = $exerciseController->edit(intval($args['id']), $body);
-        if ($expense) {
-            $response->getBody()->write(Util::encodeData($expense, "expense"));
+        $exercise = $exerciseController->edit(intval($args['id']), $body);
+        if ($exercise) {
+            $response->getBody()->write(Util::encodeData($exercise, "exercise"));
             return $response->withHeader('Content-Type', 'application/json');
         } else {
             throw new HttpNotFoundException($request);
@@ -75,7 +78,7 @@ return function (App $app) {
     /**
      * @api /exercises/{id}
      * @method DELETE
-     * @description Delete expense by id
+     * @description Delete exercise by id
      */
     $app->delete('/exercises/{id}', function (Request $request, Response $response, $args) {
         $exerciseController = new ExerciseController();

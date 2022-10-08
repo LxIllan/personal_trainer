@@ -11,6 +11,11 @@ use ReallySimpleJWT\Token;
 use Slim\App;
 
 return function (App $app) {
+    /**
+     * @api /login
+     * @method POST
+     * @description Create JWT
+     */
     $app->post('/login', function (Request $request, Response $response) {
         $userController = new UserController();
         $body = $request->getParsedBody();
@@ -31,8 +36,13 @@ return function (App $app) {
         return $response->withHeader('Content-Type', 'application/json');
     });
 
+    /**
+     * @api /login
+     * @method POST
+     * @description Delete JWT
+     */
     $app->get('/logout', function (Request $request, Response $response) {
         $response->getBody()->write(json_encode('log out'));
         return $response->withHeader('Content-Type', 'application/json');
-    })->add(JwtMiddleware::json($_ENV['JWT_SECRET'], 'jwt', ['Authorisation Failed']));
+    })->add(JwtMiddleware::json($_ENV['JWT_SECRET'], 'jwt', ['Authorization Failed']));
 };

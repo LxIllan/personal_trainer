@@ -75,7 +75,7 @@ return function (App $app) {
     /**
      * @api /memberships/{id}
      * @method DELETE
-     * @description Delete preference by id
+     * @description Delete membership by id
      */
     $app->delete('/memberships/{id}', function (Request $request, Response $response, $args) {
         $membershipController = new MembershipController();
